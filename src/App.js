@@ -42,7 +42,6 @@ function App() {
     get(child(dbRef, `/sectors`))
       .then((snapshot) => {
         if (snapshot.exists()) {
-          // console.log("ALL SECTORS", snapshot.val());
           setAllSectors(snapshot.val());
         } else {
           setAlertMsg({ type: "warning", msg: "No data available" });
@@ -68,7 +67,7 @@ function App() {
           updatedSelectedSectors.push(child.id);
         }
         if (child.children) {
-          selectChildren(child.children); // Recursively select children's children
+          selectChildren(child.children);
         }
       });
     };
@@ -80,25 +79,23 @@ function App() {
           updatedSelectedSectors.splice(childIndex, 1);
         }
         if (child.children) {
-          deselectChildren(child.children); // Recursively deselect children's children
+          deselectChildren(child.children);
         }
       });
     };
 
     if (checked) {
-      // If the option is checked, add it to the selectedSectors array
       updatedSelectedSectors.push(selectedSector.id);
       if (selectedSector.children) {
-        selectChildren(selectedSector.children); // Select children if any
+        selectChildren(selectedSector.children);
       }
     } else {
-      // If the option is unchecked, remove it from the selectedSectors array
       const index = updatedSelectedSectors.indexOf(selectedSector.id);
       if (index !== -1) {
         updatedSelectedSectors.splice(index, 1);
       }
       if (selectedSector.children) {
-        deselectChildren(selectedSector.children); // Deselect children if any
+        deselectChildren(selectedSector.children);
       }
     }
 
@@ -137,54 +134,54 @@ function App() {
       });
       setOpen(true);
     } else {
-      // get(child(dbRef, `/usersData/${name}`))
-      //   .then((snapshot) => {
-      //     if (snapshot.exists()) {
-      //       //edit data
-      //       console.log("ALL SECTORS", snapshot.val());
-      //     } else {
-      //       //enter new data
-      //       console.log("FIELD", name, selectedSectors, agree);
+      get(child(dbRef, `/usersData/${name}`))
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            //edit data
+            setAlertMsg({
+              type: "success",
+              msg: "Form submitted successfully!. Data updated!",
+            });
+          } else {
+            //enter new data
+            setAlertMsg({
+              type: "success",
+              msg: "Form submitted successfully!. New Data entered!",
+            });
+          }
 
-      //       console.log("SEC", allSectors);
-
-      set(ref(database, "usersData/" + name), {
-        name,
-        sectors: selectedSectors?.map((id) => {
-          const findSector = (sectorsArr) => {
-            for (const sector of sectorsArr) {
-              if (sector.id === id) {
-                return sector.label;
-              }
-              if (sector.children) {
-                const childLabel = findSector(sector.children);
-                if (childLabel) {
-                  return childLabel;
+          set(ref(database, "usersData/" + name), {
+            name,
+            sectors: selectedSectors?.map((id) => {
+              const findSector = (sectorsArr) => {
+                for (const sector of sectorsArr) {
+                  if (sector.id === id) {
+                    return sector.label;
+                  }
+                  if (sector.children) {
+                    const childLabel = findSector(sector.children);
+                    if (childLabel) {
+                      return childLabel;
+                    }
+                  }
                 }
-              }
-            }
-            return "";
-          };
+                return "";
+              };
 
-          return findSector(allSectors);
-        }),
-        agree,
-      })
-        .then((e) => {
-          setAlertMsg({
-            type: "success",
-            msg: "Form submitted successfully!",
-          });
-          setOpen(true);
+              return findSector(allSectors);
+            }),
+            agree,
+          })
+            .then((e) => {
+              setOpen(true);
+            })
+            .catch((e) => {
+              alert("ERROR", e);
+            });
         })
-        .catch((e) => {
-          alert("ERROR", e);
+        .catch((error) => {
+          console.error(error);
         });
-      //   }
-      // })
-      // .catch((error) => {
-      //   console.error(error);
-      // });
     }
   };
 
@@ -200,9 +197,15 @@ function App() {
         }}
       >
         <Typography
-          variant="h5"
-          component="h5"
-          sx={{ fontWeight: 600, margin: "3%", textAlign: "center" }}
+          variant="h4"
+          component="h4"
+          sx={{
+            fontWeight: 600,
+            marginBottom: "5%",
+            textAlign: "center",
+            margin: "2%",
+            // width: "50%",
+          }}
         >
           Please enter your name and pick the sectors you are currently involved
           in.
@@ -290,7 +293,7 @@ function App() {
 
       <Snackbar
         open={open}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={() => setOpen(false)}
       >
         <Alert
